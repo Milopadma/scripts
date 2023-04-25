@@ -27,24 +27,28 @@ pub fn extracturls() {
         }
     }
 }
-// function that splits the output.txt into 5 links per file
+// function that splits the output.txt one-liner into 5 links per file, since the URLs are separated by a single space only
 pub fn split() {
+    // Read the input from output.txx
     let input = File::open("output.txt").unwrap();
-    let reader = BufReader::new(input);
-    let mut count = 0;
-    let mut file_count = 0;
-    let mut file = File::create(format!("output{}.txt", file_count)).unwrap();
-    let mut writer = BufWriter::new(file);
-    for line in reader.lines() {
-        let line = line.unwrap();
-        writer.write_all(line.as_bytes()).unwrap();
-        writer.write_all(b" ").unwrap();
-        count += 1;
-        if count == 5 {
-            file_count += 1;
-            file = File::create(format!("output{}.txt", file_count)).unwrap();
-            writer = BufWriter::new(file);
-            count = 0;
-        }
+
+    // Split the input by whitespace and collect into a vector
+    let words: Vec<String> = BufReader::new(input)
+        .split(b' ')
+        .map(|w| String::from_utf8(w.unwrap()).unwrap())
+        .collect();
+
+    println!("{:?}", words);
+
+    // Open a file for writing output
+    let output = File::create("outputnew.txt").unwrap();
+
+    // Iterate over the words in chunks of 5
+    for chunk in words.chunks(5) {
+        // Join the chunk with spaces and write to the file
+        let line = chunk.join(" ") + "\n";
+        BufWriter::new(output.try_clone().unwrap())
+            .write_all(line.as_bytes())
+            .unwrap();
     }
 }
